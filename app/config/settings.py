@@ -38,11 +38,18 @@ class Settings(BaseSettings):
     jwt_expire_minutes: int = 60
     api_key_header: str = "X-API-Key"
     static_api_key: str | None = None
+    api_keys: str | None = None  # JSON: {"key": ["role", ...]}
+    auth_disabled: bool = True  # dev default; set False in production
+    encryption_key: str | None = None
+    rate_limit_per_minute: int = 600
 
     # --- Recognition / consent ------------------------------------------------
     recognition_enabled: bool = False  # OFF by default per spec
     recognition_match_threshold: float = 0.62
     recognition_uncertain_band: float = 0.08
+    recognition_min_similarity: float = 0.55
+    recognition_min_avg_similarity: float = 0.62
+    recognition_min_best_similarity: float = 0.70
     multiframe_confirm_count: int = 3
     multiframe_confirm_window_s: float = 6.0
     consent_required_for_recognition: bool = True
@@ -83,6 +90,15 @@ class Settings(BaseSettings):
     # --- Alerts ------------------------------------------------------------------
     alert_dedup_window_s: int = 300
     alert_suppression_default_s: int = 600
+    alert_webhook_url: str | None = None
+    alert_slack_webhook_url: str | None = None
+    alert_teams_webhook_url: str | None = None
+    alert_email_to: str | None = None
+    siem_webhook_url: str | None = None
+
+    # --- Queue / occupancy alerts ---------------------------------------------------
+    queue_length_alert_threshold: int = 20
+    queue_wait_alert_threshold_s: float = 900.0
 
     # --- Inference -----------------------------------------------------------------
     device: Literal["auto", "cpu", "cuda"] = "auto"
