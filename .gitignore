@@ -1,0 +1,38 @@
+# Secrets / env
+.env
+*.key
+*.pem
+secrets/
+
+# NEVER commit the prompt/spec file - it contains a GitHub credential
+prompt.txt
+Build a production-ready Python com.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# DB / artifacts
+*.db
+*.sqlite3
+models/*.onnx
+data/
+media/
+pip_*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Node (frontend)
+node_modules/
+.next/
+frontend/.env.local
