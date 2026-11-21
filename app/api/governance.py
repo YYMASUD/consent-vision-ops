@@ -1,3 +1,14 @@
+
+from app.services.retention.service import RetentionService
+from app.common.enums import ROLE_PRIVACY_OFFICER
+
+@router.post('/retention/run', dependencies=[Depends(roles_required(ROLE_SYSTEM_ADMIN, ROLE_PRIVACY_OFFICER))])
+async def run_retention(db: AsyncSession = Depends(get_db), principal: Principal = Depends(get_principal)):
+    result = await RetentionService.run_sweep(db)
+    await AuditRepository(db).record('retention.run', 'retention', actor_id=principal.subject_id, metadata=result)
+    await db.commit()
+    return result
+
 """Governance API routes."""
 from __future__ import annotations
 import uuid
