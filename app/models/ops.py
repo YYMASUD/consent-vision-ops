@@ -72,8 +72,8 @@ class OccupancySnapshot(Base):
     __tablename__ = "occupancy_snapshots"
 
     snapshot_id: Mapped[uuid.UUID] = mapped_column(UUIDPk, primary_key=True, default=uuid.uuid4)
-    camera_id: Mapped[uuid.UUID] = mapped_column(UUIDPk)
-    zone_id: Mapped[uuid.UUID | None] = mapped_column(UUIDPk, nullable=True)
+    camera_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("camera_sources.camera_id"))
+    zone_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("camera_zones.zone_id"), nullable=True)
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     occupancy_count: Mapped[int] = mapped_column(default=0)
     queue_count: Mapped[int | None] = mapped_column(nullable=True)
