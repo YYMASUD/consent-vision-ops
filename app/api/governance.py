@@ -8,7 +8,6 @@ from app.common.enums import ALERT_ACKNOWLEDGED, ALERT_RESOLVED, CASE_CLOSED, CA
 from app.schemas.governance import AlertAssignRequest, AlertAckRequest, AlertResolveRequest
 
 """Governance API routes."""
-from __future__ import annotations
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
