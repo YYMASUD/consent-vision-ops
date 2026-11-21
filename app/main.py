@@ -10,6 +10,8 @@ from app.api.events import router as events_router
 from app.api.consents import router as consents_router
 from app.api.persons import router as persons_router
 from app.api.zones import router as zones_router
+from app.api.governance import router as governance_router
+
 from app.api.reports import router as reports_router
 from app.common.events import stream
 from app.config.settings import get_settings
@@ -22,6 +24,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=get_settings().app_name, version="0.1.0", lifespan=lifespan)
 for _router in (cameras_router, consents_router, persons_router, zones_router):
+app.include_router(governance_router, prefix="/v1")
+
     app.include_router(_router, prefix="/v1")
 app.include_router(events_router, prefix="/v1")
 
