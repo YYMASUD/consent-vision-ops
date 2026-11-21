@@ -1,11 +1,9 @@
 """FastAPI application entrypoint and lifecycle endpoints."""
 from __future__ import annotations
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import PlainTextResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
-
 from app.api.cameras import router as cameras_router
 from app.api.consents import router as consents_router
 from app.api.persons import router as persons_router
@@ -20,10 +18,8 @@ async def lifespan(app: FastAPI):
     await dispose_engine()
 
 app = FastAPI(title=get_settings().app_name, version="0.1.0", lifespan=lifespan)
-app.include_router(cameras_router, prefix="/api/v1")
-app.include_router(consents_router, prefix="/api/v1")
-app.include_router(persons_router, prefix="/api/v1")
-app.include_router(zones_router, prefix="/api/v1")
+for _router in (cameras_router, consents_router, persons_router, zones_router):
+    app.include_router(_router, prefix="/v1")
 
 @app.get("/health", tags=["health"])
 async def health():
@@ -37,12 +33,11 @@ async def ready():
 async def metrics():
     return PlainTextResponse(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
-@app.websocket("/ws/live")
+@app.websocket("/v1/live/events")
 async def live_events(websocket: WebSocket):
     await websocket.accept()
-    topic = websocket.query_params.get("topic", "live")
     try:
-        async for event in stream(topic):
+        async for event in stream(websocket.query_params.get("topic", "live")):
             await websocket.send_json(event)
     except WebSocketDisconnect:
         pass

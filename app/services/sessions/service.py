@@ -1,6 +1,6 @@
 """Visit-session lifecycle operations."""
 import uuid
-from app.common.enums import SESSION_ACTIVE, SESSION_ENDED
+from app.common.enums import SESSION_ACTIVE, SESSION_CLOSED
 from app.common.utils import utcnow
 from app.models.ops import VisitSession
 
@@ -13,5 +13,5 @@ async def touch_session(repository, session, *, timestamp=None):
     session.last_seen_at = timestamp or utcnow(); await repository.flush(); return session
 
 async def end_session(repository, session, *, timestamp=None):
-    now = timestamp or utcnow(); session.status = SESSION_ENDED; session.ended_at = now; session.last_seen_at = now; await repository.flush(); return session
+    now = timestamp or utcnow(); session.status = SESSION_CLOSED; session.ended_at = now; session.last_seen_at = now; await repository.flush(); return session
 
