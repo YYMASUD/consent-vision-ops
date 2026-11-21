@@ -142,6 +142,8 @@ class RecognitionRepository(BaseRepository):
         for row in rows:
             by_decision[row.decision] = by_decision.get(row.decision, 0) + 1
 
+        return by_decision
+
 
 class AccessEventRepository(BaseRepository):
     model = AccessVerificationEvent

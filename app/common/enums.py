@@ -260,6 +260,8 @@ REC_UNKNOWN = "unknown"
 REC_FACE_QUALITY = "face_quality_insufficient"
 REC_MFA_CONFLICT = "multi_factor_conflict"
 REC_MANUAL_REVIEW = "manual_review_required"
+REC_POLICY_BLOCKED = "recognition_blocked_by_policy"
+REC_LIVENESS_ATTACK = "liveness_suspected_attack"
 SPEC_REC_DECISIONS = (
     REC_AUTHORIZED,
     REC_UNAUTHORIZED,

@@ -62,9 +62,16 @@ class Settings(BaseSettings):
     face_max_pitch_deg: float = 20.0
     face_max_roll_deg: float = 25.0
 
+    # --- Multi-factor ------------------------------------------------------------
+    mfa_correlation_window_s: float = 30.0
+    mfa_allow_credential_only: bool = True
+
     # --- Liveness ------------------------------------------------------------
     liveness_required: bool = False
     liveness_model_path: str | None = None
+    liveness_replay_window_s: float = 10.0
+    liveness_replay_repeat_threshold: int = 3
+    liveness_min_texture: float = 15.0
 
     # --- Sessions --------------------------------------------------------------
     session_gap_minutes: int = 3
