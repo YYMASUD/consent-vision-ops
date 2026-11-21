@@ -7,6 +7,8 @@ from app.auth.deps import get_principal
 from app.auth.security import Principal
 from app.db.session import get_db
 from app.repositories.events import DetectionRepository, RecognitionRepository, AccessEventRepository
+from app.common.enums import SESSION_ACTIVE
+from app.schemas.events import LiveTrack
 from app.schemas.common import Page
 from app.schemas.events import DetectionRead, RecognitionEventRead, AccessEventCreate, AccessEventRead, LiveTrack
 
@@ -36,13 +38,21 @@ async def create_access_event(body: AccessEventCreate, db: AsyncSession = Depend
     return AccessEventRead.model_validate(row)
 
 @router.get("/live-tracks", response_model=list[LiveTrack])
-async def live_tracks(_: Principal = Depends(get_principal)):
-    return []
+async def live_tracks(limit: int = 100, camera_id: uuid.UUID | None = None, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+    rows, _ = await SessionRepository(db).list_sessions(limit=min(max(limit, 1), 200), camera_id=camera_id, status=SESSION_ACTIVE)
+    return [LiveTrack(track_id=x.track_id, camera_id=x.camera_id, state=x.status, zone_id=x.zone_id, first_seen_at=x.started_at, last_seen_at=x.last_seen_at, person_id=x.person_id, is_anonymous=x.person_id is None) for x in rows]
 
 @router.get("/occupancy")
-async def occupancy(_: Principal = Depends(get_principal)):
-    return {"occupancy": 0, "zones": {}}
+async def occupancy(camera_id: uuid.UUID | None = None, zone_id: uuid.UUID | None = None, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+    if zone_id:
+        row = await OccupancyRepository(db).latest_for_zone(zone_id)
+    elif camera_id:
+        row = await OccupancyRepository(db).latest_for_camera(camera_id)
+    else:
+        return await OccupancyRepository(db).aggregate()
+    return {"occupancy": row.occupancy_count if row else 0, "queue_count": row.queue_count if row else 0, "estimated_wait_seconds": row.estimated_wait_seconds if row else 0, "camera_id": camera_id, "zone_id": zone_id}
 
 @router.get("/queue-metrics")
-async def queue_metrics(_: Principal = Depends(get_principal)):
-    return {"queues": {}, "total_waiting": 0}
+async def queue_metrics(camera_id: uuid.UUID | None = None, zone_id: uuid.UUID | None = None, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+    data = await OccupancyRepository(db).aggregate(camera_id=camera_id, zone_id=zone_id)
+    return {"queues": data, "total_waiting": data.get("peak_queue_count", 0)}
