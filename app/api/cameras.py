@@ -1,10 +1,6 @@
 """Camera CRUD, health, and frame-ingestion endpoints (spec §3, §19)."""
 from __future__ import annotations
 
-import io
-import uuid
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -179,7 +175,7 @@ async def ingest_frame(
     db: AsyncSession = Depends(get_db),
     principal: Principal = Depends(get_principal),
 ):
-    """Upload a JPEG/PNG frame; run ingestion pipeline stub returning detections."""
+    """Upload a JPEG/PNG frame; run ingestion the ingestion pipeline."""
     cam_repo = CameraRepository(db)
     camera = await cam_repo.get(camera_id)
     if camera is None:
@@ -207,4 +203,3 @@ async def ingest_frame(
         "zone_events": result.zone_events,
         "processed_at": result.timestamp.isoformat(),
     }
-
