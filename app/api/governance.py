@@ -2,7 +2,6 @@
 
 
 """Governance API routes."""
-from __future__ import annotations
 
 
 from app.services.retention.service import RetentionService
@@ -16,7 +15,6 @@ async def run_retention(db: AsyncSession = Depends(get_db), principal: Principal
     return result
 
 """Governance API routes."""
-from __future__ import annotations
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
