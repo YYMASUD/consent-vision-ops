@@ -6,8 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.deps import get_principal
 from app.auth.security import Principal
 from app.db.session import get_db
-from app.repositories.events import DetectionRepository, RecognitionRepository, AccessEventRepository
-from app.common.enums import SESSION_ACTIVE
 from app.schemas.events import LiveTrack
 from app.schemas.common import Page
 from app.schemas.events import DetectionRead, RecognitionEventRead, AccessEventCreate, AccessEventRead, LiveTrack
