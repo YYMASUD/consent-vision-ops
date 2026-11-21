@@ -1,3 +1,12 @@
+from app.common.utils import utcnow
+
+from datetime import datetime
+
+from app.schemas.governance import RetentionRunResult
+
+from app.common.enums import ALERT_ACKNOWLEDGED, ALERT_RESOLVED, CASE_CLOSED, CASE_IN_REVIEW
+from app.schemas.governance import AlertAssignRequest, AlertAckRequest, AlertResolveRequest
+
 """Governance API routes."""
 from __future__ import annotations
 import uuid
@@ -33,6 +42,33 @@ async def list_alerts(limit: int = 50, cursor: str | None = None, status: str | 
 
 @router.get("/review-cases", response_model=Page[ReviewCaseRead])
 async def list_cases(limit: int = 50, cursor: str | None = None, status: str | None = None, assigned_to: str | None = None, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+
+@router.patch("/alerts/{alert_id}/assign", response_model=AlertRead, dependencies=[Depends(roles_required(*REVIEWER_ROLES))])
+async def assign_alert(alert_id: uuid.UUID, body: AlertAssignRequest, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+    obj = await AlertRepository(db).get(alert_id)
+    if obj is None: raise HTTPException(404, "Alert not found")
+    obj.assigned_to = body.assigned_to
+    await db.flush()
+    return _read(obj, AlertRead)
+
+@router.post("/alerts/{alert_id}/ack", response_model=AlertRead, dependencies=[Depends(roles_required(*REVIEWER_ROLES))])
+async def acknowledge_alert(alert_id: uuid.UUID, body: AlertAckRequest, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+    obj = await AlertRepository(db).get(alert_id)
+    if obj is None: raise HTTPException(404, "Alert not found")
+    obj.status = ALERT_ACKNOWLEDGED
+    from app.common.utils import utcnow
+    obj.acknowledged_at = utcnow(); await db.flush(); return _read(obj, AlertRead)
+
+@router.post("/alerts/{alert_id}/resolve", response_model=AlertRead, dependencies=[Depends(roles_required(*REVIEWER_ROLES))])
+async def resolve_alert(alert_id: uuid.UUID, body: AlertResolveRequest, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+    obj = await AlertRepository(db).get(alert_id)
+    if obj is None: raise HTTPException(404, "Alert not found")
+    obj.status = ALERT_RESOLVED
+    from app.common.utils import utcnow
+    obj.resolved_at = utcnow()
+    if body.notes: obj.details = {**(obj.details or {}), "resolution_notes": body.notes}
+    await db.flush(); return _read(obj, AlertRead)
+
     rows, next_cursor = await ReviewRepository(db).list_cases(limit=min(max(limit, 1), 100), cursor=cursor, status=status, assigned_to=assigned_to)
     return Page(items=[_read(row, ReviewCaseRead) for row in rows], next_cursor=next_cursor)
 
