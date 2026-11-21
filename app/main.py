@@ -6,12 +6,10 @@ from fastapi.responses import PlainTextResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from app.api.cameras import router as cameras_router
 from app.api.events import router as events_router
-
 from app.api.consents import router as consents_router
 from app.api.persons import router as persons_router
 from app.api.zones import router as zones_router
 from app.api.governance import router as governance_router
-
 from app.api.reports import router as reports_router
 from app.common.events import stream
 from app.config.settings import get_settings
@@ -53,4 +51,3 @@ async def live_events(websocket: WebSocket):
 def run() -> None:
     import uvicorn
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=False)
-
