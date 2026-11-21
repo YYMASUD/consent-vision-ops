@@ -42,6 +42,9 @@ async def list_alerts(limit: int = 50, cursor: str | None = None, status: str | 
 
 @router.get("/review-cases", response_model=Page[ReviewCaseRead])
 async def list_cases(limit: int = 50, cursor: str | None = None, status: str | None = None, assigned_to: str | None = None, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
+    rows, next_cursor = await ReviewRepository(db).list_cases(limit=min(max(limit, 1), 100), cursor=cursor, status=status, assigned_to=assigned_to)
+    return Page(items=[_read(row, ReviewCaseRead) for row in rows], next_cursor=next_cursor)
+
 
 @router.patch("/alerts/{alert_id}/assign", response_model=AlertRead, dependencies=[Depends(roles_required(*REVIEWER_ROLES))])
 async def assign_alert(alert_id: uuid.UUID, body: AlertAssignRequest, db: AsyncSession = Depends(get_db), _: Principal = Depends(get_principal)):
